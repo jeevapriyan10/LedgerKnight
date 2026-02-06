@@ -39,9 +39,22 @@ export default function Auth({ onLogin, setMessage }) {
             setName('');
             setLocation('');
         } catch (err) {
+            console.error('Registration Error:', err); // Log full error for debugging
+            let errorMsg = 'Registration failed';
+
+            if (err.response?.data?.error) {
+                if (typeof err.response.data.error === 'string') {
+                    errorMsg = err.response.data.error;
+                } else {
+                    errorMsg = JSON.stringify(err.response.data.error);
+                }
+            } else if (err.message) {
+                errorMsg = err.message;
+            }
+
             setMessage?.({
                 type: 'error',
-                text: err.response?.data?.error || 'Registration failed',
+                text: errorMsg,
             });
         } finally {
             setLoading(false);

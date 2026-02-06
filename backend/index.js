@@ -44,12 +44,20 @@ connectMongo().catch((err) => {
 });
 
 // Routes
-app.use('/auth', require('./routes/auth'));
-app.use('/institutions', require('./routes/institutions'));
-app.use('/transactions', require('./routes/transactions'));
-app.use('/analytics', require('./routes/analytics'));
-app.use('/config', require('./routes/config'));
-app.use('/password', require('./routes/password'));
+// Routes - support both direct mounting and /api prefix for Vercel
+const routes = [
+    { path: '/auth', handler: require('./routes/auth') },
+    { path: '/institutions', handler: require('./routes/institutions') },
+    { path: '/transactions', handler: require('./routes/transactions') },
+    { path: '/analytics', handler: require('./routes/analytics') },
+    { path: '/config', handler: require('./routes/config') },
+    { path: '/password', handler: require('./routes/password') },
+];
+
+routes.forEach(route => {
+    app.use(route.path, route.handler);
+    app.use('/api' + route.path, route.handler);
+});
 
 console.log('✅ Routes mounted: /auth, /institutions, /transactions, /analytics, /config, /password');
 
