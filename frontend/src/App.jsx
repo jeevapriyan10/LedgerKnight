@@ -14,10 +14,16 @@ function App() {
         const saved = localStorage.getItem('user');
         return saved ? JSON.parse(saved) : null;
     });
-    const [token, setToken] = useState(localStorage.getItem('token') || null);
+    const [token, setToken] = useState(() => {
+        const saved = localStorage.getItem('token');
+        if (saved) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${saved}`;
+        }
+        return saved || null;
+    });
     const [message, setMessage] = useState(null);
 
-    // Set axios default header when token changes
+    // Keep useEffect for updates, but rely on sync set for init/login
     useEffect(() => {
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -54,6 +60,10 @@ function App() {
             }
 
             const { token: tkn, user: userData } = res.data;
+
+            // Set token and header synchronously before state update
+            axios.defaults.headers.common['Authorization'] = `Bearer ${tkn}`;
+
             setToken(tkn);
             setUser(userData);
             localStorage.setItem('token', tkn);
